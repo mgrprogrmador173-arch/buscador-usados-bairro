@@ -1,0 +1,4 @@
+interface:
+  display_name: Buscador de Usados por Bairro
+  short_description: Busca anúncios usados perto da sua localização
+  category: productivity
