@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Gerador de buscas de produtos usados por localização para Facebook Marketplace, OLX e Mercado Livre." />
+  <title>Buscador de Usados por Localização</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --primary: #111827;
+      --primary-2: #374151;
+      --soft: #eef2ff;
+      --ok: #065f46;
+      --ok-bg: #d1fae5;
+      --warn: #92400e;
+      --warn-bg: #fef3c7;
+      --shadow: 0 1px 6px rgba(0,0,0,0.08);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      padding: 24px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.45;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 24px;
+    }
+
+    h1, h2, h3, p {
+      margin-top: 0;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-weight: 600;
+    }
+
+    input, select, button {
+      font: inherit;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    input:focus, select:focus {
+      outline: 2px solid #c7d2fe;
+      border-color: #818cf8;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+    }
+
+    button.secondary {
+      background: var(--primary-2);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+
+    .status.ok {
+      background: var(--ok-bg);
+      color: var(--ok);
+      border-color: #a7f3d0;
+    }
+
+    .status.warn {
+      background: var(--warn-bg);
+      color: var(--warn);
+      border-color: #fde68a;
+    }
+
+    .location-box {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--soft);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .result-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .result-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .result-item a {
+      font-weight: 700;
+      text-decoration: none;
+      color: #111827;
+    }
+
+    .pill {
+      display: inline-block;
+      font-size: 12px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: #374151;
+      margin-top: 8px;
+    }
+
+    .note ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 12px 0 28px;
+    }
+
+    code {
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 14px; }
+      .actions { flex-direction: column; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Buscador de Usados por Localização</h1>
+      <p>Gere links prontos para pesquisar produtos usados no Facebook Marketplace, OLX e Mercado Livre usando sua localização atual ou um bairro/cidade manual.</p>
+      <p class="small">Este projeto é 100% HTML, CSS e JavaScript. Ideal para publicar no GitHub Pages.</p>
+    </header>
+
+    <section class="card">
+      <div class="grid">
+        <label>
+          O que você quer procurar?
+          <input id="query" type="text" placeholder="Ex.: bicicleta, sofá, iPhone" />
+        </label>
+
+        <label>
+          Raio de busca (km)
+          <input id="radius" type="number" min="1" max="100" value="5" />
+        </label>
+
+        <label>
+          Preço mínimo (R$)
+          <input id="minPrice" type="number" min="0" placeholder="Opcional" />
+        </label>
+
+        <label>
+          Preço máximo (R$)
+          <input id="maxPrice" type="number" min="0" placeholder="Opcional" />
+        </label>
+
+        <label>
+          Bairro ou cidade manual
+          <input id="manualLocation" type="text" placeholder="Use se não quiser liberar GPS" />
+        </label>
+
+        <label>
+          Filtro visual
+          <select id="qualityFilter">
+            <option value="all">Todos</option>
+            <option value="priced" selected>Somente com preço</option>
+            <option value="best">Priorizar melhor custo-benefício</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="actions">
+        <button id="locateBtn" type="button">Usar minha localização</button>
+        <button id="clearBtn" type="button" class="secondary">Limpar</button>
+        <button id="searchBtn" type="button">Gerar buscas</button>
+      </div>
+
+      <p id="status" class="status">Aguardando ação.</p>
+      <div id="locationBox" class="location-box hidden"></div>
+    </section>
+
+    <section class="card">
+      <h2>Links de busca</h2>
+      <div id="results"></div>
+    </section>
+
+    <section class="card">
+      <h2>Resumo</h2>
+      <div id="summary"></div>
+    </section>
+
+    <section class="card note">
+      <h2>Como funciona</h2>
+      <ul>
+        <li>O app usa o GPS do navegador ou uma localização digitada por você.</li>
+        <li>Depois monta links prontos para abrir nas plataformas.</li>
+        <li>Os sites podem exigir login ou ajuste manual de região.</li>
+      </ul>
+    </section>
+
+    <section class="card note">
+      <h2>Limitações reais</h2>
+      <ul>
+        <li>Este projeto não faz scraping e não coleta anúncios automaticamente.</li>
+        <li>Raio, preço e qualidade funcionam como apoio visual e contexto da busca.</li>
+        <li>Cada plataforma tem regras próprias e pode ignorar parte dos parâmetros.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    Projeto estático pronto para GitHub Pages.
+  </footer>
+
+  <script>
+    const state = {
+      coords: null,
+      accuracy: null,
+      mapLink: null
+    };
+
+    const queryEl = document.getElementById('query');
+    const radiusEl = document.getElementById('radius');
+    const minPriceEl = document.getElementById('minPrice');
+    const maxPriceEl = document.getElementById('maxPrice');
+    const manualLocationEl = document.getElementById('manualLocation');
+    const qualityFilterEl = document.getElementById('qualityFilter');
+    const statusEl = document.getElementById('status');
+    const resultsEl = document.getElementById('results');
+    const summaryEl = document.getElementById('summary');
+    const locationBoxEl = document.getElementById('locationBox');
+    const searchBtn = document.getElementById('searchBtn');
+
+    document.getElementById('locateBtn').addEventListener('click', requestLocation);
+    document.getElementById('searchBtn').addEventListener('click', renderSearches);
+    document.getElementById('clearBtn').addEventListener('click', clearForm);
+
+    [queryEl, radiusEl, minPriceEl, maxPriceEl, manualLocationEl, qualityFilterEl].forEach((el) => {
+      el.addEventListener('input', validateForm);
+      el.addEventListener('change', validateForm);
+    });
+
+    function setStatus(message, type = '') {
+      statusEl.textContent = message;
+      statusEl.className = 'status' + (type ? ' ' + type : '');
+    }
+
+    function validateForm() {
+      const hasQuery = queryEl.value.trim().length > 0;
+      searchBtn.disabled = !hasQuery;
+    }
+
+    function requestLocation() {
+      if (!navigator.geolocation) {
+        setStatus('Seu navegador não suporta geolocalização. Use bairro ou cidade manualmente.', 'warn');
+        return;
+      }
+
+      setStatus('Solicitando sua localização...', '');
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude, accuracy } = position.coords;
+          state.coords = { latitude, longitude };
+          state.accuracy = accuracy;
+          state.mapLink = 'https://www.google.com/maps?q=' + latitude + ',' + longitude;
+
+          locationBoxEl.classList.remove('hidden');
+          locationBoxEl.innerHTML =
+            'Localização obtida: <strong>' + latitude.toFixed(5) + ', ' + longitude.toFixed(5) + '</strong><br>' +
+            'Precisão aproximada: ' + Math.round(accuracy) + ' m<br>' +
+            '<a href="' + state.mapLink + '" target="_blank" rel="noopener noreferrer">Ver no mapa</a>';
+
+          setStatus('Localização pronta. Agora gere as buscas.', 'ok');
+        },
+        (error) => {
+          const messages = {
+            1: 'Permissão negada. Use bairro ou cidade manualmente.',
+            2: 'Não foi possível obter sua localização.',
+            3: 'Tempo esgotado ao obter sua localização.'
+          };
+          setStatus(messages[error.code] || 'Falha ao obter sua localização.', 'warn');
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+      );
+    }
+
+    function clearForm() {
+      queryEl.value = '';
+      radiusEl.value = '5';
+      minPriceEl.value = '';
+      maxPriceEl.value = '';
+      manualLocationEl.value = '';
+      qualityFilterEl.value = 'priced';
+      resultsEl.innerHTML = '';
+      summaryEl.innerHTML = '';
+      state.coords = null;
+      state.accuracy = null;
+      state.mapLink = null;
+      locationBoxEl.innerHTML = '';
+      locationBoxEl.classList.add('hidden');
+      setStatus('Campos limpos.', '');
+      validateForm();
+    }
+
+    function buildSearchConfig({ query, radius, minPrice, maxPrice, locationText, quality }) {
+      const qualityText =
+        quality === 'best'
+          ? 'melhor custo benefício'
+          : quality === 'priced'
+          ? 'com preço'
+          : 'todos';
+
+      const priceText = [
+        minPrice ? 'min R$' + minPrice : '',
+        maxPrice ? 'max R$' + maxPrice : ''
+      ].filter(Boolean).join(' ');
+
+      const hintText = (
+        (locationText ? locationText + ' ' : '') +
+        radius + 'km ' +
+        priceText
+      ).trim();
+
+      const facebookParams = new URLSearchParams({
+        query: query.trim()
+      });
+
+      const olxSearch = [query.trim(), locationText.trim()].filter(Boolean).join(' ');
+      const olxUrl = 'https://www.olx.com.br/brasil?q=' + encodeURIComponent(olxSearch);
+
+      const mlSearch = [query.trim(), locationText.trim()].filter(Boolean).join(' ');
+      const mlUrl = 'https://lista.mercadolivre.com.br/' + encodeURIComponent(mlSearch);
+
+      return [
+        {
+          name: 'Facebook Marketplace',
+          summary: 'Abre uma busca pronta. O Facebook pode exigir login para mostrar resultados completos.',
+          url: 'https://www.facebook.com/marketplace/search/?' + facebookParams.toString(),
+          hint: 'Termo: ' + query + ' | Região: ' + (locationText || 'pela sua localização') + ' | Raio visual: ' + radius + ' km | Filtro visual: ' + qualityText
+        },
+        {
+          name: 'OLX',
+          summary: 'Busca geral em classificados. Pode exigir ajuste manual de região dentro do site.',
+          url: olxUrl,
+          hint: 'Termo: ' + query + ' ' + hintText
+        },
+        {
+          name: 'Mercado Livre',
+          summary: 'Busca com foco em anúncios e produtos. Filtros regionais variam por categoria.',
+          url: mlUrl,
+          hint: 'Termo: ' + query + ' ' + hintText
+        }
+      ];
+    }
+
+    function renderSearches() {
+      const query = queryEl.value.trim();
+      const radius = Number(radiusEl.value || 5);
+      const minPrice = minPriceEl.value.trim();
+      const maxPrice = maxPriceEl.value.trim();
+      const quality = qualityFilterEl.value;
+      const manualLocation = manualLocationEl.value.trim();
+
+      if (!query) {
+        setStatus('Digite o que você quer procurar.', 'warn');
+        return;
+      }
+
+      if (minPrice && maxPrice && Number(minPrice) > Number(maxPrice)) {
+        setStatus('O preço mínimo não pode ser maior que o máximo.', 'warn');
+        return;
+      }
+
+      const locationText = manualLocation || (state.coords
+        ? state.coords.latitude.toFixed(5) + ', ' + state.coords.longitude.toFixed(5)
+        : '');
+
+      if (!locationText) {
+        setStatus('Use sua localização ou informe bairro/cidade manualmente.', 'warn');
+        return;
+      }
+
+      const searches = buildSearchConfig({
+        query,
+        radius,
+        minPrice,
+        maxPrice,
+        locationText,
+        quality
+      });
+
+      resultsEl.innerHTML =
+        '<div class="result-list">' +
+        searches.map((item) => (
+          '<div class="result-item">' +
+            '<div><a href="' + item.url + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(item.name) + '</a></div>' +
+            '<p>' + escapeHtml(item.summary) + '</p>' +
+            '<small>' + escapeHtml(item.hint) + '</small><br>' +
+            '<span class="pill">Abre em nova aba</span>' +
+          '</div>'
+        )).join('') +
+        '</div>';
+
+      summaryEl.innerHTML =
+        '<p><strong>Busca:</strong> ' + escapeHtml(query) + '</p>' +
+        '<p><strong>Área:</strong> ' + escapeHtml(locationText) + '</p>' +
+        '<p><strong>Raio visual:</strong> ' + radius + ' km</p>' +
+        '<p><strong>Faixa de preço:</strong> ' + escapeHtml(minPrice || 'sem mínimo') + ' até ' + escapeHtml(maxPrice || 'sem máximo') + '</p>' +
+        '<p><strong>Filtro visual:</strong> ' + escapeHtml(qualityLabel(quality)) + '</p>' +
+        '<p><strong>Observação:</strong> os links acima abrem as plataformas com a busca preparada. Algumas exigem ajuste manual de localização e login.</p>';
+
+      setStatus('Buscas geradas com sucesso.', 'ok');
+    }
+
+    function qualityLabel(value) {
+      if (value === 'priced') return 'Somente com preço';
+      if (value === 'best') return 'Priorizar melhor custo-benefício';
+      return 'Todos';
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    validateForm();
+  </script>
+</body>
+</html>
