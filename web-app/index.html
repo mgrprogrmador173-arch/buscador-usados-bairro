@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buscador de Usados por Bairro</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Buscador de Usados por Bairro</h1>
+      <p>Use sua localização atual para abrir buscas prontas em Facebook Marketplace, OLX e Mercado Livre.</p>
+    </header>
+
+    <section class="card">
+      <div class="grid">
+        <label>
+          O que você quer procurar?
+          <input id="query" type="text" placeholder="Ex.: bicicleta, sofá, iPhone" />
+        </label>
+
+        <label>
+          Raio de busca (km)
+          <input id="radius" type="number" min="1" max="100" value="5" />
+        </label>
+
+        <label>
+          Preço mínimo (R$)
+          <input id="minPrice" type="number" min="0" placeholder="Opcional" />
+        </label>
+
+        <label>
+          Preço máximo (R$)
+          <input id="maxPrice" type="number" min="0" placeholder="Opcional" />
+        </label>
+
+        <label>
+          Bairro ou cidade manual
+          <input id="manualLocation" type="text" placeholder="Use se não quiser liberar GPS" />
+        </label>
+
+        <label>
+          Filtro padrão
+          <select id="qualityFilter">
+            <option value="all">Todos</option>
+            <option value="priced" selected>Somente com preço</option>
+            <option value="best">Priorizar melhor custo-benefício</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="actions">
+        <button id="locateBtn">Usar minha localização</button>
+        <button id="searchBtn">Gerar buscas</button>
+      </div>
+
+      <p id="status" class="status">Aguardando ação.</p>
+      <div id="locationBox" class="location-box hidden"></div>
+    </section>
+
+    <section class="card">
+      <h2>Links de busca</h2>
+      <div id="results"></div>
+    </section>
+
+    <section class="card">
+      <h2>Resumo</h2>
+      <div id="summary"></div>
+    </section>
+
+    <section class="card note">
+      <h2>Limitações</h2>
+      <ul>
+        <li>Este app não faz scraping automático.</li>
+        <li>Ele usa seu GPS no navegador e monta links de busca prontos.</li>
+        <li>Facebook Marketplace pode exigir login.</li>
+        <li>OLX e Mercado Livre podem aplicar filtros diferentes conforme a região.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
